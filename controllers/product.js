@@ -1,39 +1,81 @@
 const ProductModel = require('../models/product');
-exports.addProduct = (req, res, next) => {
-    const data = req.body;
-    const product = new ProductModel(data.title, data.price);
-    product.save();
-    res.status(200).json({ message: 'Product created', data });
+exports.addProduct = async (req, res, next) => {
+    const {title, price, description, imageUrl} = req.body;
+    const user = req.user;
+    try{
+        const product = await user.createProduct({
+           title,
+           price,
+           description,
+           imageUrl
+       })
+       console.log('Product created:', product.toJSON());
+        res.status(201).json({ message: 'Product created', product });
+
+    }catch(err){
+
+    }
 }
 
-exports.getProducts = (req, res, next) => {
-    ProductModel.fetchAll((products) => {
+exports.getProducts = async(req, res, next) => {
+    try{
+        const user = req.user;
+        const products = await user.getProducts();
+        if(products){
+            console.log('Products fetched:', products.map(p => p.toJSON()));
+            res.status(200).json({ message: 'Products fetched', products });
+        }else{
+            res.status(404).json({ message: 'No products found' });
+        }
 
-        res.status(200).json({ message: 'Products fetched', products });
-    });
+    }catch(err){
+        console.log(err);
+    }
 }
 
-exports.getProduct = (req, res, next) => {
+exports.getProduct = async (req, res, next) => {
     const {id:productId} = req.params;
-    ProductModel.findById(productId, (product) => {
-        if (product) {
-            res.status(200).json({ message: 'Product fetched', product });
+    try{
+        const user = req.user;
+        const products = await user.getProducts({
+            where: { id: productId }
+        });
+          if (products) {
+            res.status(200).json({ message: 'Product fetched', product: products[0] });
         } else {
             res.status(404).json({ message: 'Product not found' });
         }
-    });
+    }catch(err){
+        console.log(err);
+    }
 }
 
-exports.updateProduct = (req, res, next) => {
+exports.updateProduct = async(req, res, next) => {
     const {edit} = req.query;
     const {id:productId} = req.params;
-    const {title, price} = req.body;
-    ProductModel.update(productId, title, price);
-    res.status(200).json({ message: 'Product updated', productId, title, price, edit });
+    const {title, price, description, imageUrl} = req.body;
+    try{
+        const updatedProduct = await ProductModel.update(
+            { title, price, description, imageUrl },
+            {where:{id: productId}}
+        );
+        res.status(200).json({ message: 'Product updated', updatedProduct });
+    }catch(err){
+        console.log(err);
+    }
+    
 }
 
-exports.deleteProduct = (req, res, next) => {
+exports.deleteProduct = async(req, res, next) => {
     const {id:productId} = req.params;
-    ProductModel.delete(productId);
-    res.status(200).json({ message: 'Product deleted', productId });
+    try{
+        const product = await ProductModel.destroy({where:{id: productId}});
+         if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }else{
+            res.status(200).json({ message: 'Product deleted', product });
+        }
+
+    }catch(err){
+    }
 }
