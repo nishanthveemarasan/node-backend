@@ -13,6 +13,7 @@ app.use((req, res, next) => {
     next();
 });
 
+
 app.use('/product',productRoute);
 app.use('/cart',cartRoute);
 
