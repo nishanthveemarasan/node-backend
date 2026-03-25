@@ -1,0 +1,27 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "This project uses **MongoDB** as the database and **Mongo Express** as a browser-based UI to manage your data. Both run in Docker containers.",
+  "homepage": "https://github.com/nishanthveemarasan/node-backend#readme",
+  "bugs": {
+    "url": "https://github.com/nishanthveemarasan/node-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nishanthveemarasan/node-backend.git"
+  },
+  "license": "ISC",
+  "author": "Nishanth Veemarsan",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
