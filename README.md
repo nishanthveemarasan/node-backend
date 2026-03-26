@@ -1,26 +1,37 @@
 # node-backend
 
-## MongoDB Setup & Access
+## Getting Started
 
-This project uses **MongoDB** as the database and **Mongo Express** as a browser-based UI to manage your data. Both run in Docker containers.
+### 1. Prerequisites
+Ensure you have **Docker** and **Docker Compose** installed. You will also need `openssl` to generate the database security key.
 
----
-
-### MongoDB Connection
-
-Use the following connection string in your Node.js project:
+### 2. Environment Setup
+Create a `.env` file in the root directory:
 
 ```bash
-mongodb://root:secret@mongodb:27017/mydb?authSource=admin
+APP_PORT=3800
+MONGO_CONNECT="mongodb://root:secret@mongodb:27017/mydb?authSource=admin&replicaSet=rs0&directConnection=true"
+```
+### 3. Generate the key
+```
+sudo openssl rand -base64 756 > mongodb.key
 ```
 
+### 3.1 CRITICAL: Set strict permissions (Linux/Mac only)
+```
+sudo chmod 400 mongodb.key
+```
+### 4. Launch the Application
+```
+docker-compose up -d --build
+```
 
 ### Access MongoDB via CLI (mongosh)
 
 **Inside the MongoDB container:**
 
 ```bash
-sudo docker-compose exec mongodb mongosh -u root -p secret
+sudo docker-compose exec mongodb mongosh -u root -p secret 
 ```
 
 ### Access MongoDB via Browser (Mongo Express)

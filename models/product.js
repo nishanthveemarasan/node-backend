@@ -1,5 +1,4 @@
-const { ObjectId } = require("mongodb");
-const { getDB } = require("../util/databaseMongoDB");
+import prisma from "../util/prismaClient.js";
 
 class Product {
   constructor(title, price, imageUrl, description) {
@@ -9,20 +8,31 @@ class Product {
     this.description = description;
   }
 
-  async save() {
+  async save(userId) {
+    console.log(userId)
     try {
-      const db = getDB();
-      const result = await db.collection("products").insertOne(this);
+      const result = await prisma.product.create({
+        data: {
+            ...this,
+            user:{
+                connect: {id: userId}
+            }
+        },
+      });
+      console.log("Product saved:", result);
       return result;
     } catch (err) {
       console.error("Error saving product:", err);
     }
   }
 
-  static async fetchAll() {
+  static async fetchAll(userId) {
     try {
-      const db = getDB();
-      const products = await db.collection("products").find().toArray();
+      const products = await prisma.product.findMany({
+        where: {
+            userId: userId
+        }
+      });
       return products;
     } catch (err) {
       console.error("Error fetching products:", err);
@@ -31,34 +41,40 @@ class Product {
 
   static async findById(id) {
     try {
-      const db = getDB();
-      const product = await db
-        .collection("products")
-        .findOne({ _id: new ObjectId(id) });
+      const product = await prisma.product.findUnique({
+        where: {
+            id: id
+        }
+      });
       return product;
     } catch (err) {
       console.error("Error finding product by ID:", err);
     }
   }
 
-    static async update(id, updatedData) {
+    static async update(userId, productId, updatedData) {
     try {
-      const db = getDB();
-      const result = await db
-        .collection("products")
-        .updateOne({ _id: new ObjectId(id) }, { $set: updatedData });
+      const result = await prisma.product.update({
+        where: {
+            id: productId,
+            userId: userId
+        },
+        data: updatedData
+      });
       return result;
     } catch (err) {
       console.error("Error updating product:", err);
     }
   }
 
-   static async delete(id) {
+   static async delete(userId, productId) {
     try {
-      const db = getDB();
-      const result = await db
-        .collection("products")
-        .deleteOne({ _id: new ObjectId(id) });
+      const result = await prisma.product.delete({
+        where: {
+            id: productId,
+            userId: userId
+        }
+      });
       return result;
     } catch (err) {
       console.error("Error deleting product:", err);
@@ -66,4 +82,4 @@ class Product {
    }
 }
 
-module.exports = Product;
+export default Product;
