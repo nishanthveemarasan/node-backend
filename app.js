@@ -4,12 +4,40 @@ import productRoute from './routes/product.js';
 import UserModel from './models/user.js';
 import cartRoute from './routes/cart.js';
 import {get404} from './controllers/error.js';
+import authRouter from './routes/auth.js';
 
-// import { mongoConnect } from './util/databaseMongoDB';
+import session from 'express-session';
+import { PrismaClient } from "./generated/prisma/client.ts";
+import  {PrismaSessionStore} from '@quixo3/prisma-session-store';
 
 const app = express();
 
 app.use(express.json());
+
+// app.use(session({
+//     secret: 'mysecret', // will be used to sign the session ID cookie
+//     resave: false, // session will not be saved back to the session store unless it was modified during the request
+//     saveUninitialized: false, // session will not be saved for uninitialized sessions (sessions that are new but not modified)
+// })); 
+
+app.use(
+    session({
+      cookie: {
+       maxAge: 7 * 24 * 60 * 60 * 1000 // ms
+      },
+      secret: 'a santa at nasa',
+      resave: false,
+      saveUninitialized: false,
+      store: new PrismaSessionStore(
+        new PrismaClient(),
+        {
+          checkPeriod: 2 * 60 * 1000,  //ms
+          dbRecordIdIsSessionId: true,
+          dbRecordIdFunction: undefined,
+        }
+      )
+    })
+  );
 
 app.use(async(req, res, next) => {
     try{
@@ -26,9 +54,8 @@ app.use(async(req, res, next) => {
 
 app.use('/product',productRoute);
 app.use('/cart',cartRoute);
+app.use('/auth', authRouter);
 
 app.use(get404);
 
-// mongoConnect(() => {
-// });
 app.listen(3000);
