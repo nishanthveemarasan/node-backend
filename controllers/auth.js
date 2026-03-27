@@ -1,11 +1,45 @@
+import UserModal from '../models/user.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import transporter from '../util/mailer.js';
+
 class AuthController{
     static async login(req, res, next){
         try{
             const {username, password} = req.body;
-            req.session.loggedIn = true;
-            console.log(username, password);
-            // res.setHeader('Set-Cookie', 'token=abc123; HttpOnly');
-            res.status(200).json({message: "Login successful"});
+            const user = await UserModal.findByEmail(username);
+            if(!user){
+                return res.status(400).json({message: "Invalid username or password"});
+            }
+            const isMatch = await bcrypt.compare(password, user.password);
+            if(!isMatch){
+                return res.status(400).json({message: "Invalid username or password"});
+            }
+            const token = jwt.sign({userId: user.id, email:user.email}, process.env.JWT_SECRET, {expiresIn: '1h'});
+            res.status(200).json({message: "Login successful", token});
+        }catch(err){
+            console.log(err);
+            res.status(500).json({message: "Internal Server Error"});
+        }
+    }
+
+    static async signUp(req, res, next){
+        try{
+            const {name, email, password, password_confirmation} = req.body;
+            const userExists = await UserModal.findByEmail(email);
+            if(userExists){
+                return res.status(400).json({message: "User already exists"});
+            }
+            const hashPassword = await bcrypt.hash(password, 12 );
+            const newUser = new UserModal(null, name, email, hashPassword);
+            await newUser.save();
+            await transporter.sendMail({
+                from: '"Node Backend" <node@backend.com>',
+                to: email,
+                subject: "Welcome to Node Backend",
+                html: `<p>Hello ${name},</p><p>Thank you for signing up to our service! We're excited to have you on board.</p><p>Best regards,<br>The Node Backend Team</p>`
+            });
+            res.status(200).json({message: "Sign Up successful"});
         }catch(err){
             console.log(err);
             res.status(500).json({message: "Internal Server Error"});

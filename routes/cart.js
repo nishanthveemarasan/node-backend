@@ -3,7 +3,6 @@ import express from 'express';
 const router = express.Router();
 
 import cartController from '../controllers/cart.js';
-
 router.route('/')
     .post(cartController.addToCart)
     .get(cartController.getCart);

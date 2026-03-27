@@ -4,6 +4,7 @@ class ProductController {
     static addProduct = async (req, res, next) => {
         const {title, price, description, imageUrl} = req.body;
         const user = req.user;
+        console.log('Adding product for user:', user);
         try{
             const product = new ProductModel(
                title,
@@ -11,7 +12,7 @@ class ProductController {
                imageUrl,
                description
             );
-            const result = await product.save(user.id);
+            const result = await product.save(user.userId);
             console.log('Product created:', result);
             res.status(201).json({ message: 'Product created', result });
     

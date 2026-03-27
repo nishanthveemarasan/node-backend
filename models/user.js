@@ -2,9 +2,10 @@ import { ObjectId } from "mongodb";
 import prisma from "../util/prismaClient.js";
 
 class User {
-    constructor(id, name, email) {
+    constructor(id, name, email, password) {
         this.name = name;
         this.email = email;
+        this.password = password;
     }
 
     async save() {
@@ -27,6 +28,17 @@ class User {
             return user;
         } catch (err) {
             console.error("Error finding user by ID:", err);
+        }
+    }
+
+    static async findByEmail(email) {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { email }
+            });
+            return user;
+        } catch (err) {
+            console.error("Error finding user by email:", err);
         }
     }
 }
