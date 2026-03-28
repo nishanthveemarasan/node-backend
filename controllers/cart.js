@@ -1,16 +1,23 @@
 import CartModel from "../models/cart.js";
 import ProductModel from "../models/product.js";
+import StripeService from "../util/stripe.js";
 
 class CartController {
     static addToCart = async(req, res, next) => {
-        const {id:productId, price:productPrice} = req.body;
+        const {id:productId, action} = req.body;
         try{
             const user = req.user;
-            await CartModel.addToCart(user.id, productId);
-           res.status(200).json({ message: `Product with id ${productId} added to cart` });
+             const cartAdded = await CartModel.addToCart(user.userId, productId, action);
+            if(cartAdded){
+                res.status(200).json({ message: `Product is updated to the cart` });
+            }else{
+                throw new Error('Failed to add product to cart');
+            }
     
         }catch(err){
-            console.log(err);
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            next(error);
         }
     
        
@@ -19,14 +26,12 @@ class CartController {
     static getCart = async(req, res, next) => {
         try{
             const user = req.user;
-            const products = await CartModel.getCart(user.id);
-            // if(!cart){
-            //     return res.status(404).json({ message: 'Cart not found', cart: null }); 
-            // }
-            // const products = await cart.getProducts();
-            res.status(200).json({ message: 'Cart fetched', cart: { products } });
+            const {products, totalAmount} = await CartModel.getCart(user.id);
+            res.status(200).json({ message: 'Cart fetched', orderDetails: { products, totalAmount } });
         }catch(err){
-            console.log(err);
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            next(error);
         }
        
     }
@@ -35,15 +40,53 @@ class CartController {
         try{
             const user = req.user;
             const {id:productId} = req.params;
-            const response = await CartModel.deleteFromCart(user.id, productId);
-    
-            res.status(200).json({ message: `Product with id ${productId} deleted from cart` });
-    
-    
+           const {products, totalAmount} =  await CartModel.deleteFromCart(user.id, productId);
+            res.status(200).json({ 
+                message: `Product removed from the order successfully`,
+                orderDetails: { products, totalAmount }
+    });
+   
         }catch(err){
             console.log(err);
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            next(error);
         }
     
+    }   
+
+    static checkout = async(req, res, next) => {
+        try{
+            const user = req.user;
+            const result = await CartModel.checkout(user.id);
+            res.status(200).json({ 
+                message: `Checkout successful`,
+                orderDetails: result
+            });
+   
+        }catch(err){
+            console.log(err);
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            next(error);
+        }
+    }
+
+    static generatePaymentLink = async(req, res, next) => {
+        try{
+            const {id:orderId} = req.params;
+            const {userId} = req.user;
+            const paymentUrl = await StripeService.generatePaymentLink(userId,orderId);
+            res.status(200).json({ 
+                message: `Payment link generated successfully`,
+                paymentLink: paymentUrl
+            });
+        }catch(err){
+            console.log(err);
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            next(error);
+        }
     }
 }
 export default CartController;

@@ -2,13 +2,16 @@ import ProductModel from '../models/product.js';
 
 class ProductController {
     static addProduct = async (req, res, next) => {
-        const {title, price, description, imageUrl} = req.body;
+        const {title, price, description} = req.body;
+        const imageUrl = req.file ? req.file.path : null;
+        if(!imageUrl){
+            throw new Error('Image is required');
+        }
         const user = req.user;
-        console.log('Adding product for user:', user);
         try{
             const product = new ProductModel(
                title,
-               price,
+               parseFloat(price),
                imageUrl,
                description
             );
@@ -17,14 +20,18 @@ class ProductController {
             res.status(201).json({ message: 'Product created', result });
     
         }catch(err){
-    
+            const error = new Error(err)
+            error.httpStatusCode = 500;
+            next(error);
         }
     }
     
     static getProducts = async(req, res, next) => {
         try{
+            const {page:pageNumber=1} = req.query;
+            console.log(pageNumber);
             const user = req.user;
-            const products = await ProductModel.fetchAll(user.id);
+            const products = await ProductModel.fetchAll(user.id, pageNumber);
             if(products){
                 // console.log('Products fetched:', products.map(p => p.toJSON()));
                 res.status(200).json({ message: 'Products fetched', products });
@@ -55,15 +62,19 @@ class ProductController {
     static updateProduct = async(req, res, next) => {
         const {edit} = req.query;
         const {id:productId} = req.params;
-        const {title, price, description, imageUrl} = req.body;
+        const {title, price, description} = req.body;
+        const imageUrl = req.file ? req.file.path : null;
         try{
             const user = req.user;
-            const updatedProduct = await ProductModel.update(user.id, productId, {
+            const editData = {
                 title,
-                price,
-                description,
-                imageUrl
-            });
+                price: parseFloat(price),
+                description
+            }
+            if(imageUrl){
+                editData.imageUrl = imageUrl;
+            }
+            const updatedProduct = await ProductModel.update(user.id, productId, editData);
              if (!updatedProduct) {
                 return res.status(404).json({ message: 'Product not found' });
             }

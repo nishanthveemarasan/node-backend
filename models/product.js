@@ -1,3 +1,4 @@
+import { url } from "node:inspector";
 import prisma from "../util/prismaClient.js";
 
 class Product {
@@ -9,29 +10,52 @@ class Product {
   }
 
   async save(userId) {
-    console.log(userId)
     try {
-      const result = await prisma.product.create({
+      const product = await prisma.product.create({
         data: {
-            ...this,
+            title: this.title,
+            price: this.price,
+            description: this.description,
             user:{
                 connect: {id: userId}
             }
         },
       });
-      console.log("Product saved:", result);
-      return result;
+      console.log("Product created:", product);
+      if(this.imageUrl){
+        await prisma.files.create({
+            data: {
+                url: this.imageUrl,
+                product: {
+                    connect: {id: product.id}
+                }
+            }
+        });
+      }
+      return product;
     } catch (err) {
       console.error("Error saving product:", err);
     }
   }
 
-  static async fetchAll(userId) {
+  static async fetchAll(userId, pageNumber = 1) {
     try {
+      const limmit = 25;
+      const offset = (pageNumber - 1) * limmit;
       const products = await prisma.product.findMany({
         where: {
             userId: userId
-        }
+        },
+        include:{
+            file: {
+                select: {
+                    url: true
+                }
+            }
+        },
+        skip: offset,
+        take: limmit,
+
       });
       return products;
     } catch (err) {

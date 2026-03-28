@@ -2,7 +2,6 @@ import UserModal from '../models/user.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import transporter from '../util/mailer.js';
-
 class AuthController{
     static async login(req, res, next){
         try{
@@ -26,10 +25,6 @@ class AuthController{
     static async signUp(req, res, next){
         try{
             const {name, email, password, password_confirmation} = req.body;
-            const userExists = await UserModal.findByEmail(email);
-            if(userExists){
-                return res.status(400).json({message: "User already exists"});
-            }
             const hashPassword = await bcrypt.hash(password, 12 );
             const newUser = new UserModal(null, name, email, hashPassword);
             await newUser.save();
