@@ -23,7 +23,7 @@ class Product {
       });
       console.log("Product created:", product);
       if(this.imageUrl){
-        await prisma.files.create({
+        await prisma.file.create({
             data: {
                 url: this.imageUrl,
                 product: {

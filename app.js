@@ -5,6 +5,7 @@ import {get404} from './controllers/error.js';
 import apiRouter from './routes/api-router.js';
 import publicRouter from "./routes/public-router.js";
 import errorResponseMiddleware from './middleware/error-response.js';
+import { initSocket } from './util/socket.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -21,4 +22,9 @@ app.use(get404);
 
 app.use(errorResponseMiddleware);
 
-app.listen(3000);
+const server = app.listen(3000);
+const io = initSocket(server);
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+});

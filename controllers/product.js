@@ -1,4 +1,5 @@
 import ProductModel from '../models/product.js';
+import { getIo } from '../util/socket.js';
 
 class ProductController {
     static addProduct = async (req, res, next) => {
@@ -16,6 +17,7 @@ class ProductController {
                description
             );
             const result = await product.save(user.userId);
+            getIo().emit('product_changed', result);
             console.log('Product created:', result);
             res.status(201).json({ message: 'Product created', result });
     
