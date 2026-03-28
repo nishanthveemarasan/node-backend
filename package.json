@@ -1,0 +1,43 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "This project uses **MongoDB** as the database and **Mongo Express** as a browser-based UI to manage your data. Both run in Docker containers.",
+  "homepage": "https://github.com/nishanthveemarasan/node-backend#readme",
+  "bugs": {
+    "url": "https://github.com/nishanthveemarasan/node-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nishanthveemarasan/node-backend.git"
+  },
+  "license": "ISC",
+  "author": "Nishanth Veemarsan",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "nodemon": "^3.1.14",
+    "prisma": "6.19"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19",
+    "@quixo3/prisma-session-store": "^3.1.19",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.1",
+    "multer": "^2.1.1",
+    "mysql2": "^3.20.0",
+    "nodemailer": "^8.0.4",
+    "sequelize": "^6.37.8",
+    "socket.io": "^4.8.3",
+    "stripe": "^21.0.1"
+  }
+}

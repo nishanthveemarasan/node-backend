@@ -1,2 +1,8 @@
 .env
 node_modules
+data/*
+/generated/prisma
+
+/generated/prisma
+mongodb.key
+/uploads/*
