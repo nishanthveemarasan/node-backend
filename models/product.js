@@ -1,4 +1,3 @@
-import { url } from "node:inspector";
 import prisma from "../util/prismaClient.js";
 
 class Product {
@@ -21,17 +20,16 @@ class Product {
             }
         },
       });
-      console.log("Product created:", product);
-      if(this.imageUrl){
-        await prisma.file.create({
-            data: {
-                url: this.imageUrl,
-                product: {
-                    connect: {id: product.id}
-                }
-            }
-        });
-      }
+      // if(this.imageUrl){
+      //   await prisma.file.create({
+      //       data: {
+      //           url: this.imageUrl,
+      //           product: {
+      //               connect: {id: product.id}
+      //           }
+      //       }
+      //   });
+      // }
       return product;
     } catch (err) {
       console.error("Error saving product:", err);
