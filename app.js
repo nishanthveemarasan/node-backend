@@ -1,7 +1,6 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import {get404} from './controllers/error.js';
 import errorResponseMiddleware from './middleware/error-response.js';
 
 import { ApolloServer } from '@apollo/server';
@@ -9,6 +8,7 @@ import { expressMiddleware } from '@as-integrations/express5';
 import typeDefs from './graphql/schema.js';
 import resolvers from './graphql/resolvers.js';
 import authCheckMiddleware from './middleware/auth-check.js';
+import { get404 } from './util/404.js';
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
