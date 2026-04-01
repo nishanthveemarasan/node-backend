@@ -1,5 +1,6 @@
 import { body } from "express-validator";
 import UserModal from "../models/user.js";
+import RefreshToken from "../models/refresh-token.js";
 export const singupValidator = [
   body("email")
     .isEmail()
@@ -35,4 +36,15 @@ export const loginValidator = [
   body("username").isEmail(),
   body("password", "Password is required")
         .notEmpty(),
+];
+
+export const refreshTokenValidator = [
+  body("refreshToken", "Refresh token is required")
+        .notEmpty()
+        .custom(async(value, { req }) => {
+          const activeToken = await RefreshToken.findByToken(value);
+          if(!activeToken){
+              return Promise.reject('Invalid refresh token');
+          }
+        })
 ];
