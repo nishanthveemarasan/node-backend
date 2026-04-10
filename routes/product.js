@@ -28,12 +28,17 @@ const upload = multer({
 
 router.route('/')
     .post(
+        upload.single('image'), 
         addProductValidator,
-        // inputValidateMiddleware,
-        upload.single('image'), productController.addProduct)
+        inputValidateMiddleware,
+        productController.addProduct)
     .get(productController.getProducts)
 router.route('/:id')
-    .patch(updateProductValidator,inputValidateMiddleware,productController.updateProduct)
+    .patch(upload.single('image'),
+        updateProductValidator,
+        inputValidateMiddleware,
+        productController.updateProduct
+    )
     .get(productController.getProduct)
     .delete(productController.deleteProduct)
 
